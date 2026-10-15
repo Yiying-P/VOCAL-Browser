@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>天依浏览器</title>
+<title>VOCAL-Browser</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -420,7 +420,7 @@
 <div class="status-bar">
   <span id="statusText">就绪</span>
   <span class="right">
-    <span class="version-tag">天依浏览器 v1.0.0-beta</span>
+    <span class="version-tag">VOCAL-Browser v1.0.0</span>
     &nbsp;|&nbsp;
     <span id="loadingText"></span>
   </span>
@@ -506,7 +506,7 @@ function createNewTab(url) {
     newtab.id = 'nt-' + tabId;
     newtab.innerHTML = `
       <img src="../assets/icon.png" class="newtab-logo" alt="洛天依">
-      <div class="newtab-title">✦ 天依浏览器 ✦</div>
+      <div class="newtab-title">✦ VOCAL-Browser ✦</div>
       <div class="newtab-subtitle">用歌声，为你唱出心中最强烈的那首歌 ♪</div>
       <div class="newtab-search">
         <input type="text" placeholder="搜索或输入网址..." onkeydown="if(event.key==='Enter')navigateFromNewtab(this.value)">

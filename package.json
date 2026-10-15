@@ -1,10 +1,10 @@
 {
-  "name": "luotianyi-browser",
-  "productName": "Tianyi Browser",
-  "version": "1.0.0-beta",
-  "description": "洛天依主题浏览器 - Tianyi Browser",
+  "name": "vocal-browser",
+  "productName": "VOCAL-Browser",
+  "version": "1.0.0",
+  "description": "VOCAL-Browser - 洛天依主题浏览器",
   "main": "src/main.js",
-  "author": "Tianyi Browser Team",
+  "author": "VOCALLTY(微扣)",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -16,9 +16,9 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.tianyi.browser",
-    "productName": "Tianyi Browser",
-    "copyright": "Copyright (c) 2026 Tianyi Browser",
+    "appId": "com.vocal.browser",
+    "productName": "VOCAL-Browser",
+    "copyright": "Copyright (c) 2026 VOCALLTY(微扣)",
     "directories": {
       "output": "dist"
     },
@@ -41,7 +41,7 @@
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Tianyi Browser"
+      "shortcutName": "VOCAL-Browser"
     }
   }
 }

@@ -46,7 +46,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: '天依浏览器',
+    title: 'VOCAL-Browser',
     icon: path.join(__dirname, '../assets/icon.png'),
     backgroundColor: '#66ccff',
     frame: true,

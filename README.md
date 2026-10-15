@@ -1,10 +1,11 @@
-# 天依浏览器 (Tianyi Browser)
+# VOCAL-Browser
 
 🎤 洛天依主题的轻量级浏览器
 
-![Version](https://img.shields.io/badge/version-1.0.0--beta-blue?color=66ccff)
+![Version](https://img.shields.io/badge/version-1.0.0-blue?color=66ccff)
 ![Electron](https://img.shields.io/badge/Electron-31-4ab8f0)
 ![Platform](https://img.shields.io/badge/platform-Windows-66ccff)
+![Developer](https://img.shields.io/badge/dev-VOCALLTY(%E5%BE%AE%E6%89%A3)-66ccff)
 
 ## ✨ 功能特性
 
@@ -23,7 +24,7 @@
 
 ## 📥 下载安装
 
-前往 [Releases](https://github.com/your-repo/tianyi-browser/releases) 下载最新版 MSI 安装包，双击即可安装。
+前往 [Releases](https://github.com/Yiying-P/tianyi-browser/releases) 下载最新版 MSI 安装包，双击即可安装。
 
 ## 🚀 本地开发
 
@@ -37,6 +38,10 @@ npm start
 # 打包 MSI
 npm run build
 ```
+
+## 👨‍💻 开发者
+
+**VOCALLTY(微扣)**
 
 ## 🎵 关于洛天依
 
