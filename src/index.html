@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>天依浏览器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --tianyi-blue: #66ccff;
+    --tianyi-blue-dark: #4ab8f0;
+    --tianyi-blue-light: #a8e0ff;
+    --tianyi-bg: #f0f8ff;
+    --tianyi-text: #2c3e50;
+    --tianyi-shadow: 0 2px 8px rgba(102, 204, 255, 0.3);
+  }
+  body {
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: var(--tianyi-bg);
+    color: var(--tianyi-text);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== 标签栏 ===== */
+  .tab-bar {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--tianyi-blue), var(--tianyi-blue-dark));
+    padding: 4px 8px 0 8px;
+    height: 40px;
+    overflow-x: auto;
+    flex-shrink: 0;
+  }
+  .tab-bar::-webkit-scrollbar { height: 0; }
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-size: 13px;
+    max-width: 200px;
+    min-width: 120px;
+    margin-right: 2px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--tianyi-bg);
+    color: var(--tianyi-text);
+  }
+  .tab:hover { background: rgba(255,255,255,0.4); }
+  .tab.active:hover { background: #fff; }
+  .tab .tab-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tab .tab-close {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  .tab .tab-close:hover { background: rgba(0,0,0,0.1); opacity: 1; }
+  .new-tab-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 4px;
+    flex-shrink: 0;
+  }
+  .new-tab-btn:hover { background: rgba(255,255,255,0.5); }
+
+  /* ===== 工具栏 ===== */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #fff;
+    border-bottom: 1px solid #e0f0ff;
+    box-shadow: var(--tianyi-shadow);
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    width: 34px; height: 34px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--tianyi-blue-dark);
+  }
+  .nav-btn:hover { background: var(--tianyi-blue-light); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn:disabled:hover { background: transparent; }
+
+  .address-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: var(--tianyi-bg);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    padding: 0 16px;
+    height: 38px;
+    transition: all 0.2s;
+  }
+  .address-bar:focus-within {
+    border-color: var(--tianyi-blue);
+    background: #fff;
+  }
+  .address-bar input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: var(--tianyi-text);
+  }
+
+  .engine-select {
+    height: 34px;
+    border: 2px solid var(--tianyi-blue-light);
+    border-radius: 17px;
+    padding: 0 12px;
+    background: #fff;
+    color: var(--tianyi-text);
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+  }
+  .engine-select:hover { border-color: var(--tianyi-blue); }
+
+  .star-btn {
+    font-size: 18px;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .star-btn.active { color: #ffc107; }
+
+  /* ===== 书签栏 ===== */
+  .bookmark-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    background: #fff;
+    border-bottom: 1px solid #e0f0ff;
+    overflow-x: auto;
+    flex-shrink: 0;
+    height: 32px;
+  }
+  .bookmark-bar::-webkit-scrollbar { height: 0; }
+  .bookmark-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+    color: var(--tianyi-text);
+  }
+  .bookmark-item:hover { background: var(--tianyi-blue-light); }
+
+  /* ===== 内容区 ===== */
+  .content-area {
+    flex: 1;
+    position: relative;
+    background: #fff;
+  }
+  webview {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: none;
+  }
+  webview.active { display: flex; }
+
+  /* ===== 新标签页 ===== */
+  .newtab-page {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, var(--tianyi-blue-light) 0%, #fff 60%);
+    overflow-y: auto;
+  }
+  .newtab-page.active { display: flex; }
+  .newtab-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    box-shadow: 0 8px 32px rgba(102, 204, 255, 0.4);
+    margin-bottom: 16px;
+    border: 4px solid #fff;
+  }
+  .newtab-title {
+    font-size: 28px;
+    color: var(--tianyi-blue-dark);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .newtab-subtitle {
+    font-size: 14px;
+    color: #7f8c9b;
+    margin-bottom: 32px;
+  }
+  .newtab-search {
+    width: 500px;
+    max-width: 90%;
+    display: flex;
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 4px 20px rgba(102, 204, 255, 0.25);
+    overflow: hidden;
+  }
+  .newtab-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+  .newtab-search button {
+    background: var(--tianyi-blue);
+    color: #fff;
+    border: none;
+    padding: 0 32px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .newtab-search button:hover { background: var(--tianyi-blue-dark); }
+
+  .quick-links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 36px;
+  }
+  .quick-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 12px;
+    transition: background 0.2s;
+  }
+  .quick-link:hover { background: rgba(255,255,255,0.6); }
+  .quick-link-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .quick-link-name { font-size: 12px; color: #555; }
+
+  /* ===== 下载面板 ===== */
+  .download-panel {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 320px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    z-index: 100;
+    display: none;
+    overflow: hidden;
+  }
+  .download-panel.show { display: block; }
+  .download-header {
+    padding: 12px 16px;
+    background: var(--tianyi-blue);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .download-close { cursor: pointer; opacity: 0.8; }
+  .download-close:hover { opacity: 1; }
+  .download-list {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .download-item {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
+  }
+  .download-item:last-child { border-bottom: none; }
+  .download-filename {
+    font-weight: 500;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .download-progress-bar {
+    height: 4px;
+    background: #e0f0ff;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .download-progress-fill {
+    height: 100%;
+    background: var(--tianyi-blue);
+    transition: width 0.3s;
+  }
+  .download-status { color: #888; font-size: 11px; margin-top: 2px; }
+  .download-status.done { color: #27ae60; }
+  .download-status.failed { color: #e74c3c; }
+
+  /* 状态栏 */
+  .status-bar {
+    height: 24px;
+    background: var(--tianyi-blue-light);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 11px;
+    color: #5a7a8a;
+    flex-shrink: 0;
+    gap: 12px;
+  }
+  .status-bar .right { margin-left: auto; }
+
+  .version-tag {
+    background: rgba(255,255,255,0.6);
+    padding: 1px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 标签栏 -->
+<div class="tab-bar" id="tabBar">
+  <button class="new-tab-btn" onclick="createNewTab()" title="新建标签页">+</button>
+</div>
+
+<!-- 工具栏 -->
+<div class="toolbar">
+  <button class="nav-btn" id="backBtn" onclick="goBack()" title="后退">←</button>
+  <button class="nav-btn" id="forwardBtn" onclick="goForward()" title="前进">→</button>
+  <button class="nav-btn" id="reloadBtn" onclick="reload()" title="刷新">↻</button>
+  <button class="nav-btn" onclick="goHome()" title="主页">🏠</button>
+
+  <div class="address-bar">
+    <input type="text" id="addressBar" placeholder="输入网址或搜索..." />
+  </div>
+
+  <select class="engine-select" id="engineSelect" onchange="saveEngine()">
+    <option value="https://www.baidu.com/s?wd=">百度</option>
+    <option value="https://www.google.com/search?q=">Google</option>
+    <option value="https://www.bing.com/search?q=">Bing</option>
+    <option value="https://www.sogou.com/web?query=">搜狗</option>
+    <option value="https://search.bilibili.com/all?keyword=">哔哩哔哩</option>
+  </select>
+
+  <button class="star-btn" id="starBtn" onclick="toggleBookmark()" title="收藏书签">☆</button>
+  <button class="nav-btn" onclick="toggleDownloadPanel()" title="下载管理">⬇</button>
+</div>
+
+<!-- 书签栏 -->
+<div class="bookmark-bar" id="bookmarkBar"></div>
+
+<!-- 内容区 -->
+<div class="content-area" id="contentArea">
+  <!-- 动态生成的 webview 和新标签页 -->
+</div>
+
+<!-- 下载面板 -->
+<div class="download-panel" id="downloadPanel">
+  <div class="download-header">
+    <span>下载管理</span>
+    <span class="download-close" onclick="toggleDownloadPanel(false)">✕</span>
+  </div>
+  <div class="download-list" id="downloadList">
+    <div style="padding:20px;text-align:center;color:#999;font-size:12px;">暂无下载任务</div>
+  </div>
+</div>
+
+<!-- 状态栏 -->
+<div class="status-bar">
+  <span id="statusText">就绪</span>
+  <span class="right">
+    <span class="version-tag">天依浏览器 v1.0.0-beta</span>
+    &nbsp;|&nbsp;
+    <span id="loadingText"></span>
+  </span>
+</div>
+
+<script>
+// ====== 状态管理 ======
+let tabs = [];
+let activeTabId = null;
+let bookmarks = [];
+let searchEngine = localStorage.getItem('searchEngine') || 'https://www.baidu.com/s?wd=';
+
+const engines = {
+  'baidu': 'https://www.baidu.com/s?wd=',
+  'google': 'https://www.google.com/search?q=',
+  'bing': 'https://www.bing.com/search?q=',
+  'sogou': 'https://www.sogou.com/web?query=',
+  'bilibili': 'https://search.bilibili.com/all?keyword='
+};
+
+// ====== 初始化 ======
+document.getElementById('engineSelect').value = searchEngine;
+loadBookmarks();
+createNewTab('https://www.luotianyi.fyi/');
+
+// ====== 标签页管理 ======
+function createNewTab(url) {
+  const tabId = 'tab-' + Date.now() + '-' + Math.random().toString(36).substr(2,5);
+  const tab = {
+    id: tabId,
+    url: url || '',
+    title: url ? '加载中...' : '新标签页'
+  };
+  tabs.push(tab);
+
+  // 创建标签按钮
+  const tabBar = document.getElementById('tabBar');
+  const tabEl = document.createElement('div');
+  tabEl.className = 'tab';
+  tabEl.id = 'tab-' + tabId;
+  tabEl.innerHTML = `<span class="tab-title">${tab.title}</span><span class="tab-close" onclick="closeTab('${tabId}', event)">✕</span>`;
+  tabEl.onclick = (e) => { if (!e.target.classList.contains('tab-close')) switchTab(tabId); };
+  tabBar.insertBefore(tabEl, document.querySelector('.new-tab-btn'));
+
+  // 创建内容区
+  const contentArea = document.getElementById('contentArea');
+
+  if (url) {
+    // webview
+    const webview = document.createElement('webview');
+    webview.id = 'wv-' + tabId;
+    webview.src = url;
+    webview.setAttribute('allowpopups', '');
+    webview.style.height = '100%';
+    contentArea.appendChild(webview);
+
+    webview.addEventListener('did-start-loading', () => {
+      document.getElementById('loadingText').textContent = '加载中...';
+    });
+    webview.addEventListener('did-stop-loading', () => {
+      document.getElementById('loadingText').textContent = '';
+      tab.title = webview.getTitle() || '新标签页';
+      tab.url = webview.getURL();
+      updateTabTitle(tabId);
+      updateAddressBar(tab.url);
+      updateNavButtons(webview);
+      updateStarBtn(tab.url);
+    });
+    webview.addEventListener('did-navigate', (e) => {
+      tab.url = e.url;
+      updateAddressBar(tab.url);
+      updateNavButtons(webview);
+    });
+    webview.addEventListener('did-navigate-in-page', (e) => {
+      tab.url = e.url;
+      updateAddressBar(tab.url);
+      updateNavButtons(webview);
+    });
+  } else {
+    // 新标签页
+    const newtab = document.createElement('div');
+    newtab.className = 'newtab-page';
+    newtab.id = 'nt-' + tabId;
+    newtab.innerHTML = `
+      <img src="../assets/icon.png" class="newtab-logo" alt="洛天依">
+      <div class="newtab-title">✦ 天依浏览器 ✦</div>
+      <div class="newtab-subtitle">用歌声，为你唱出心中最强烈的那首歌 ♪</div>
+      <div class="newtab-search">
+        <input type="text" placeholder="搜索或输入网址..." onkeydown="if(event.key==='Enter')navigateFromNewtab(this.value)">
+        <button onclick="navigateFromNewtab(document.querySelector('#nt-${tabId} input').value)">搜索</button>
+      </div>
+      <div class="quick-links">
+        <div class="quick-link" onclick="quickNavigate('https://www.baidu.com')">
+          <div class="quick-link-icon">🔍</div><div class="quick-link-name">百度</div>
+        </div>
+        <div class="quick-link" onclick="quickNavigate('https://www.bilibili.com')">
+          <div class="quick-link-icon">📺</div><div class="quick-link-name">哔哩哔哩</div>
+        </div>
+        <div class="quick-link" onclick="quickNavigate('https://www.zhihu.com')">
+          <div class="quick-link-icon">💡</div><div class="quick-link-name">知乎</div>
+        </div>
+        <div class="quick-link" onclick="quickNavigate('https://www.luotianyi.fyi/')">
+          <div class="quick-link-icon">🎤</div><div class="quick-link-name">洛天依</div>
+        </div>
+      </div>
+    `;
+    contentArea.appendChild(newtab);
+  }
+
+  switchTab(tabId);
+}
+
+function switchTab(tabId) {
+  activeTabId = tabId;
+  // 更新标签样式
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+
+  // 更新内容显示
+  document.querySelectorAll('webview').forEach(w => w.classList.remove('active'));
+  document.querySelectorAll('.newtab-page').forEach(n => n.classList.remove('active'));
+
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+
+  if (tab.url) {
+    const wv = document.getElementById('wv-' + tabId);
+    if (wv) {
+      wv.classList.add('active');
+      updateAddressBar(wv.getURL());
+      updateNavButtons(wv);
+      updateStarBtn(wv.getURL());
+    }
+  } else {
+    const nt = document.getElementById('nt-' + tabId);
+    if (nt) nt.classList.add('active');
+    document.getElementById('addressBar').value = '';
+  }
+}
+
+function closeTab(tabId, event) {
+  if (event) event.stopPropagation();
+  const idx = tabs.findIndex(t => t.id === tabId);
+  if (idx === -1) return;
+
+  tabs.splice(idx, 1);
+  document.getElementById('tab-' + tabId)?.remove();
+  document.getElementById('wv-' + tabId)?.remove();
+  document.getElementById('nt-' + tabId)?.remove();
+
+  if (activeTabId === tabId) {
+    if (tabs.length > 0) {
+      switchTab(tabs[Math.max(0, idx-1)].id);
+    } else {
+      createNewTab();
+    }
+  }
+}
+
+// ====== 导航 ======
+function getActiveWebview() {
+  return document.getElementById('wv-' + activeTabId);
+}
+
+function goBack() {
+  const wv = getActiveWebview();
+  if (wv && wv.canGoBack()) wv.goBack();
+}
+
+function goForward() {
+  const wv = getActiveWebview();
+  if (wv && wv.canGoForward()) wv.goForward();
+}
+
+function reload() {
+  const wv = getActiveWebview();
+  if (wv) wv.reload();
+}
+
+function goHome() {
+  navigate('https://www.luotianyi.fyi/');
+}
+
+function navigate(url) {
+  const tab = tabs.find(t => t.id === activeTabId);
+  if (!tab) return;
+
+  // 如果是新标签页，需要转换为webview
+  if (!tab.url) {
+    document.getElementById('nt-' + activeTabId)?.remove();
+    const contentArea = document.getElementById('contentArea');
+    const webview = document.createElement('webview');
+    webview.id = 'wv-' + activeTabId;
+    webview.src = url;
+    webview.setAttribute('allowpopups', '');
+    webview.style.height = '100%';
+    contentArea.appendChild(webview);
+
+    webview.addEventListener('did-stop-loading', () => {
+      tab.title = webview.getTitle();
+      tab.url = webview.getURL();
+      updateTabTitle(tab.id);
+      updateAddressBar(tab.url);
+      updateNavButtons(webview);
+      updateStarBtn(tab.url);
+    });
+    webview.addEventListener('did-navigate', (e) => {
+      tab.url = e.url;
+      updateAddressBar(tab.url);
+      updateNavButtons(webview);
+    });
+
+    tab.url = url;
+    webview.classList.add('active');
+  } else {
+    const wv = getActiveWebview();
+    if (wv) wv.loadURL(url);
+  }
+}
+
+function navigateFromNewtab(val) {
+  if (!val.trim()) return;
+  navigate(parseInput(val));
+}
+
+function parseInput(input) {
+  input = input.trim();
+  // 如果是URL格式
+  if (/^https?:\/\//i.test(input)) return input;
+  if (/^[\w-]+(\.[\w-]+)+([\/?#].*)?$/i.test(input) && !input.includes(' ')) {
+    return 'https://' + input;
+  }
+  // 否则用搜索引擎搜索
+  return searchEngine + encodeURIComponent(input);
+}
+
+function updateAddressBar(url) {
+  document.getElementById('addressBar').value = url || '';
+}
+
+function updateNavButtons(wv) {
+  document.getElementById('backBtn').disabled = !(wv && wv.canGoBack());
+  document.getElementById('forwardBtn').disabled = !(wv && wv.canGoForward());
+}
+
+function updateTabTitle(tabId) {
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+  const el = document.querySelector(`#tab-${tabId} .tab-title`);
+  if (el) el.textContent = tab.title;
+}
+
+// 地址栏回车
+document.getElementById('addressBar').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const val = e.target.value;
+    if (val.trim()) navigate(parseInput(val));
+  }
+});
+
+function quickNavigate(url) {
+  navigate(url);
+}
+
+// ====== 搜索引擎 ======
+function saveEngine() {
+  searchEngine = document.getElementById('engineSelect').value;
+  localStorage.setItem('searchEngine', searchEngine);
+}
+
+// ====== 书签 ======
+async function loadBookmarks() {
+  bookmarks = await window.browserAPI.getBookmarks();
+  renderBookmarkBar();
+}
+
+function renderBookmarkBar() {
+  const bar = document.getElementById('bookmarkBar');
+  bar.innerHTML = '';
+  bookmarks.forEach(bm => {
+    const item = document.createElement('div');
+    item.className = 'bookmark-item';
+    item.innerHTML = `<span>${bm.icon || '🔖'}</span><span>${escapeHtml(bm.title)}</span>`;
+    item.onclick = () => navigate(bm.url);
+    item.oncontextmenu = (e) => {
+      e.preventDefault();
+      if (confirm(`删除书签 "${bm.title}"？`)) {
+        window.browserAPI.removeBookmark(bm.url).then(newBms => {
+          bookmarks = newBms;
+          renderBookmarkBar();
+        });
+      }
+    };
+    bar.appendChild(item);
+  });
+}
+
+function updateStarBtn(url) {
+  const star = document.getElementById('starBtn');
+  const isBookmarked = bookmarks.some(b => b.url === url);
+  star.classList.toggle('active', isBookmarked);
+  star.textContent = isBookmarked ? '★' : '☆';
+}
+
+async function toggleBookmark() {
+  const tab = tabs.find(t => t.id === activeTabId);
+  const wv = getActiveWebview();
+  if (!wv && !tab.url) return;
+
+  const url = wv ? wv.getURL() : tab.url;
+  const title = wv ? wv.getTitle() : tab.title;
+
+  const existing = bookmarks.find(b => b.url === url);
+  if (existing) {
+    bookmarks = await window.browserAPI.removeBookmark(url);
+  } else {
+    bookmarks = await window.browserAPI.addBookmark({ title, url, icon: '🔖' });
+  }
+  renderBookmarkBar();
+  updateStarBtn(url);
+}
+
+// ====== 下载面板 ======
+function toggleDownloadPanel(show) {
+  const panel = document.getElementById('downloadPanel');
+  if (show === undefined) {
+    panel.classList.toggle('show');
+  } else {
+    panel.classList.toggle('show', show);
+  }
+}
+
+window.browserAPI.onDownloadProgress((data) => {
+  addOrUpdateDownload(data);
+});
+
+window.browserAPI.onDownloadDone((data) => {
+  addOrUpdateDownload(data);
+});
+
+function addOrUpdateDownload(data) {
+  const list = document.getElementById('downloadList');
+  if (list.querySelector('[data-empty]')) list.innerHTML = '';
+
+  let item = document.getElementById('dl-' + data.id);
+  if (!item) {
+    item = document.createElement('div');
+    item.className = 'download-item';
+    item.id = 'dl-' + data.id;
+    list.prepend(item);
+  }
+  const pct = data.totalBytes > 0 ? Math.round(data.receivedBytes / data.totalBytes * 100) : 0;
+  const statusText = data.state === 'completed' ? '已完成' :
+                     data.state === 'cancelled' ? '已取消' :
+                     data.state === 'interrupted' ? '失败' :
+                     pct + '%';
+  const statusClass = data.state === 'completed' ? 'done' :
+                      (data.state === 'interrupted' || data.state === 'cancelled') ? 'failed' : '';
+
+  item.innerHTML = `
+    <div class="download-filename">${escapeHtml(data.filename)}</div>
+    <div class="download-progress-bar"><div class="download-progress-fill" style="width:${pct}%"></div></div>
+    <div class="download-status ${statusClass}">${statusText}</div>
+  `;
+}
+
+// ====== 工具函数 ======
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "name": "luotianyi-browser",
+  "productName": "Tianyi Browser",
+  "version": "1.0.0-beta",
+  "description": "洛天依主题浏览器 - Tianyi Browser",
+  "main": "src/main.js",
+  "author": "Tianyi Browser Team",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win msi",
+    "build:dir": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.tianyi.browser",
+    "productName": "Tianyi Browser",
+    "copyright": "Copyright (c) 2026 Tianyi Browser",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/icon.png",
+      "target": [
+        {
+          "target": "msi",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "msi": {
+      "oneClick": false,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tianyi Browser"
+    }
+  }
+}
